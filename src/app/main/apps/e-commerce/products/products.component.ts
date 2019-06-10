@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatPaginator, MatSort } from '@angular/material';
-import { DataSource } from '@angular/cdk/collections';
+import { DataSource, SelectionModel } from '@angular/cdk/collections';
 import { BehaviorSubject, fromEvent, merge, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
@@ -18,13 +18,12 @@ import { takeUntil } from 'rxjs/internal/operators';
     encapsulation: ViewEncapsulation.None
 })
 export class EcommerceProductsComponent implements OnInit {
-    
-    numbers = [];
-    status: string;
+
     dataSource: FilesDataSource | null;
     displayedColumns = ['id', 'image', 'name'];
     SKU = '';
     page: any;
+    pages: any;
 
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
@@ -35,6 +34,10 @@ export class EcommerceProductsComponent implements OnInit {
     @ViewChild('filter')
     filter: ElementRef;
 
+    initialSelection = [];
+    allowMultiSelect = true;
+    selection = new SelectionModel<any>(this.allowMultiSelect, this.initialSelection);
+
     // Private
     private _unsubscribeAll: Subject<any>;
 
@@ -43,7 +46,6 @@ export class EcommerceProductsComponent implements OnInit {
     ) {
         // Set the private defaults
         this._unsubscribeAll = new Subject();
-        this.status = 'enabled';
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -54,22 +56,57 @@ export class EcommerceProductsComponent implements OnInit {
      * On init
      */
     ngOnInit(): void {
-        this.dataSource = new FilesDataSource(this._ecommerceProductsService, this.paginator, this.sort);
-        // console.log('dataSource.filteredData.length', this.dataSource.filteredData.length);
-        let pages = this._ecommerceProductsService.pages;
-        this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
-        // console.log('numbers',this.numbers);
+        this.dataSource = new FilesDataSource(this._ecommerceProductsService, this.sort);
+
+        this.page = this._ecommerceProductsService.page;
+        this.pages = this._ecommerceProductsService.pages;
     }
 
     searchProductSKU(): void {
-        this._ecommerceProductsService.searchProduct(this.SKU);
+        this._ecommerceProductsService.searchProduct(this.SKU).then(() => {
+            this.page = this._ecommerceProductsService.page;
+            this.pages = this._ecommerceProductsService.pages;
+        });;
     }
 
-    SelectChangingValue(event): any {
-        // console.log(event.target.value);
-        this.page = event.target.value;
-        // this._ecommerceProductsService.getProducts(event.target.value, this.status);
-        this._ecommerceProductsService.getProducts(event.target.value);
+    prevPage(): void {
+        let p = this.page - 1;
+        this._ecommerceProductsService.getProducts(p).then(() => {
+            this.page = this._ecommerceProductsService.page;
+        });
+    }
+
+    nextPage(): void {
+        let p = this.page + 1;
+        this._ecommerceProductsService.getProducts(p).then(() => {
+            this.page = this._ecommerceProductsService.page;
+        });
+    }
+
+    firstPage(): void {
+        this._ecommerceProductsService.getProducts(1).then(() => {
+            this.page = this._ecommerceProductsService.page;
+        });
+    }
+
+    lastPage(): void {
+        this._ecommerceProductsService.getProducts(this.pages).then(() => {
+            this.page = this._ecommerceProductsService.page;
+        });
+    }
+
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.dataSource.filteredData.length;
+        return numSelected == numRows;
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggle() {
+        this.isAllSelected() ?
+            this.selection.clear() :
+            this.dataSource.filteredData.forEach(row => this.selection.select(row));
     }
 }
 
@@ -87,7 +124,7 @@ export class FilesDataSource extends DataSource<any>
      */
     constructor(
         private _ecommerceProductsService: EcommerceProductsService,
-        private _matPaginator: MatPaginator,
+        // private _matPaginator: MatPaginator,
         private _matSort: MatSort
     ) {
         super();
@@ -103,7 +140,7 @@ export class FilesDataSource extends DataSource<any>
     connect(): Observable<any[]> {
         const displayDataChanges = [
             this._ecommerceProductsService.onProductsChanged,
-            this._matPaginator.page,
+            // this._matPaginator.page,
             this._filterChange,
             this._matSort.sortChange
         ];
@@ -119,9 +156,11 @@ export class FilesDataSource extends DataSource<any>
 
                     data = this.sortData(data);
 
+                    return data;
+
                     // Grab the page's slice of data.
-                    const startIndex = this._matPaginator.pageIndex * this._matPaginator.pageSize;
-                    return data.splice(startIndex, this._matPaginator.pageSize);
+                    // const startIndex = this._matPaginator.pageIndex * this._matPaginator.pageSize;
+                    // return data.splice(startIndex, this._matPaginator.pageSize);
                 }
                 ));
     }

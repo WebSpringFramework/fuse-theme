@@ -9,6 +9,7 @@ import { HeadersService } from '@fuse/services/headers.service';
 @Injectable()
 export class EcommerceOrdersService implements Resolve<any> {
 
+    page: any;
     pages: any;
     orders: any[];
     onOrdersChanged: BehaviorSubject<any>;
@@ -27,11 +28,12 @@ export class EcommerceOrdersService implements Resolve<any> {
 
     constructor(private _httpClient: HttpClient, private _headerService: HeadersService) {
         this.onOrdersChanged = new BehaviorSubject({});
-        var now = new Date();
-        this.dateStart = this.formatDate(now);
-        this.dateEnd = this.formatDate(now);
+        let now = new Date();
+        let today = this.formatDate(now);        
+        this.dateStart = today;
+        this.dateEnd = today;
         this.marketplace = 'all';
-        this.status = 'all';
+        this.status = 'aprovado';
 
         this.getMarketplaces();
         this.getStatuses();
@@ -87,7 +89,7 @@ export class EcommerceOrdersService implements Resolve<any> {
         this._httpClient.get<any>(this.API_MARKETPLACES, {headers})
         .subscribe(
             (data) => {
-                console.log(data);
+                // console.log(data);
                 
                 this.channels = data;
             },
@@ -132,9 +134,10 @@ export class EcommerceOrdersService implements Resolve<any> {
             this._httpClient.get<any>(api, {headers})
             .subscribe(
                 (data) => {
-                    console.log(data);
+                   // console.log(data);
                     
-                    this.orders = data.orders;                    
+                    this.orders = data.orders;  
+                    this.page = page;                  
                     this.pages = Math.ceil(data.total / 100);                    
                     this.onOrdersChanged.next(this.orders);
 
@@ -162,7 +165,8 @@ export class EcommerceOrdersService implements Resolve<any> {
                     //console.log(data);
                     
                     this.orders = [data];                    
-                    this.pages = 1;                    
+                    this.page = 1;   
+                    this.pages = 1;                   
                     this.onOrdersChanged.next(this.orders);
 
                     resolve(data.orders);

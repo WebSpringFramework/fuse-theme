@@ -23,9 +23,11 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
     statuses: any;
     channels: any;
     CODE = '';
+    page: any;
     pages: any;
     dataSource: FilesDataSource | null;
     displayedColumns = ['code', 'total', 'date', 'marketplace', 'status'];
+    selectedStatus: any;
 
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
@@ -56,8 +58,21 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
 
         this.statuses = this._ecommerceOrdersService.statuses;
 
-        this.dateStart = this._ecommerceOrdersService.dateStart;
-        this.dateStart = this._ecommerceOrdersService.dateEnd;
+        let now = new Date();
+        let today = this.formatDate(now); 
+
+        this.dateStart = today;
+        this.dateEnd = today;
+
+        this.selectedStatus = this._ecommerceOrdersService.status;
+
+        console.log('selectedStatus',this.selectedStatus);
+    }
+
+    formatDate(date) {
+        function twoDigit(n) { return (n < 10 ? '0' : '') + n; }
+        
+        return `${date.getFullYear()}-${twoDigit(date.getMonth() + 1)}-${twoDigit(date.getDate())}`;
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -69,15 +84,17 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {        
-        this.dataSource = new FilesDataSource(this._ecommerceOrdersService, this.paginator, this.sort);
-        // console.log('dataSource.filteredData.length', this.dataSource.filteredData.length);
+        this.dataSource = new FilesDataSource(this._ecommerceOrdersService, this.sort);
+        
+        this.page = this._ecommerceOrdersService.page;
         this.pages = this._ecommerceOrdersService.pages;
-        // this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
-        // console.log('numbers',this.numbers);        
     }
 
     searchOrderCODE(): void {
-        this._ecommerceOrdersService.searchOrder(this.CODE);
+        this._ecommerceOrdersService.searchOrder(this.CODE).then(() => {
+            this.page = this._ecommerceOrdersService.page;
+            this.pages = this._ecommerceOrdersService.pages;
+        });
     }
 
     filterProductsPage(event): any {
@@ -110,6 +127,32 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
         });
     }
 
+    prevPage(): void {
+        let p = this.page - 1;
+        this._ecommerceOrdersService.getOrders(p).then(() => {
+            this.page = this._ecommerceOrdersService.page;
+        });
+    }
+
+    nextPage(): void {
+        let p = this.page + 1;
+        this._ecommerceOrdersService.getOrders(p).then(() => {
+            this.page = this._ecommerceOrdersService.page;
+        });
+    }
+
+    firstPage(): void {
+        this._ecommerceOrdersService.getOrders(1).then(() => {
+            this.page = this._ecommerceOrdersService.page;
+        });
+    }
+
+    lastPage(): void {
+        this._ecommerceOrdersService.getOrders(this.pages).then(() => {
+            this.page = this._ecommerceOrdersService.page;
+        });
+    }    
+
     /**
      * On destroy
      */
@@ -128,7 +171,7 @@ export class FilesDataSource extends DataSource<any>
 
     constructor(
         private _ecommerceOrdersService: EcommerceOrdersService,
-        private _matPaginator: MatPaginator,
+        // private _matPaginator: MatPaginator,
         private _matSort: MatSort
     )
     {
@@ -176,7 +219,7 @@ export class FilesDataSource extends DataSource<any>
     {
         const displayDataChanges = [
             this._ecommerceOrdersService.onOrdersChanged,
-            this._matPaginator.page,
+            // this._matPaginator.page,
             this._filterChange,
             this._matSort.sortChange
         ];
@@ -191,9 +234,11 @@ export class FilesDataSource extends DataSource<any>
 
                 data = this.sortData(data);
 
+                return data;
+
                 // Grab the page's slice of data.
-                const startIndex = this._matPaginator.pageIndex * this._matPaginator.pageSize;
-                return data.splice(startIndex, this._matPaginator.pageSize);
+                // const startIndex = this._matPaginator.pageIndex * this._matPaginator.pageSize;
+                // return data.splice(startIndex, this._matPaginator.pageSize);
             })
         );
 

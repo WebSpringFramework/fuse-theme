@@ -9,6 +9,7 @@ import { HeadersService } from '@fuse/services/headers.service';
 @Injectable()
 export class EcommerceProductsService implements Resolve<any> {
 
+    page: any;
     pages: any;
     products: any[];
     onProductsChanged: BehaviorSubject<any>;
@@ -36,15 +37,16 @@ export class EcommerceProductsService implements Resolve<any> {
     getProducts(page = 1, per_page = 100) {
         return new Promise((resolve, reject) => {
             
-            let api = `${this.API}?page=${page}&per_page=${per_page}&filters[status]=enabled`;
+            let api = `${this.API}?page=${page}&per_page=${per_page}`;
             let headers = this._headerService.getHeaders();
             
             this._httpClient.get<any>(api, {headers})
             .subscribe(
                 (data) => {
                     //console.log(data);
-                    
+
                     this.products = data.products;                    
+                    this.page = page;
                     this.pages = Math.ceil(data.total / 100);                    
                     this.onProductsChanged.next(this.products);
 
@@ -63,7 +65,7 @@ export class EcommerceProductsService implements Resolve<any> {
     searchProduct(SKU) {
         return new Promise((resolve, reject) => {
 
-            let api = `${this.API}?page=1&filters[status]=enabled&filters[sku]=${SKU}`;
+            let api = `${this.API}?page=1&filters[sku]=${SKU}`;
             let headers = this._headerService.getHeaders();
             
             return this._httpClient.get<any>(api, {headers})
@@ -72,6 +74,7 @@ export class EcommerceProductsService implements Resolve<any> {
                     //console.log(data);
                     
                     this.products = data.products;                    
+                    this.page = 1;
                     this.pages = Math.ceil(data.total / 100);                    
                     this.onProductsChanged.next(this.products);
 

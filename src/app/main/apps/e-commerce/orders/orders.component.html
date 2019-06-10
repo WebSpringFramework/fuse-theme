@@ -18,7 +18,7 @@
                 </mat-icon>
                 <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">Meus Pedidos</span>
             </div>
-            <!-- / APP TITLE -->            
+            <!-- / APP TITLE -->
 
             <!-- SEARCH -->
             <div class="search-wrapper  ml-sm-32">
@@ -32,7 +32,8 @@
             <!-- DATE START -->
             <div class="search-wrapper  ml-sm-32">
                 <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
-                    <input class="unstyled" type="date" [value]="dateStart" (change)="filterProductsDateStart($event)" />
+                    <input class="unstyled" type="date" [value]="dateStart"
+                        (change)="filterProductsDateStart($event)" />
                 </div>
             </div>
             <!-- / DATE START -->
@@ -51,8 +52,7 @@
         <!-- CONTENT CARD -->
         <div class="content-card">
 
-            <mat-table class="orders-table" #table [dataSource]="dataSource" matSort [@animateStagger]="{value:'50'}"
-                fusePerfectScrollbar>
+            <mat-table class="orders-table" #table [dataSource]="dataSource" matSort [@animateStagger]="{value:'50'}">
 
                 <!-- Código -->
                 <ng-container matColumnDef="code">
@@ -60,6 +60,46 @@
                     <mat-cell *matCellDef="let order">
                         <p class="text-truncate">{{order.code}}</p>
                     </mat-cell>
+                    <mat-footer-cell *matFooterCellDef>
+                        <!-- PAGINATION -->
+                        <div class="paginacao">
+                            <button class="mat-icon-button" (click)="firstPage()" [disabled]="page === 1">
+                                <span class="mat-button-wrapper">
+                                    <svg class="mat-paginator-icon" focusable="false" viewBox="0 0 24 24">
+                                        <path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <button class="mat-icon-button" (click)="prevPage()" [disabled]="page === 1">
+                                <span class="mat-button-wrapper">
+                                    <svg class="mat-paginator-icon" focusable="false" viewBox="0 0 24 24">
+                                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            página {{page}} de {{pages}}
+
+                            <button class="mat-icon-button" (click)="nextPage()" [disabled]="page === pages">
+                                <span class="mat-button-wrapper">
+                                    <svg class="mat-paginator-icon" focusable="false" viewBox="0 0 24 24">
+                                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <button class="mat-icon-button" (click)="lastPage()" [disabled]="page === pages">
+                                <span class="mat-button-wrapper">
+                                    <svg class="mat-paginator-icon" focusable="false" viewBox="0 0 24 24">
+                                        <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path>
+                                    </svg>
+                                </span>
+                            </button>
+
+                        </div>
+                        <!-- / PAGINATION -->
+                    </mat-footer-cell>
                 </ng-container>
 
                 <!-- Valor Pedido -->
@@ -75,22 +115,21 @@
 
                 <!-- Data -->
                 <ng-container matColumnDef="date">
-                    <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>Data</mat-header-cell>                   
+                    <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>Data</mat-header-cell>
                     <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
                         <p class="text-truncate">
                             {{order.updated_at | date:'d/MM/yy hh:mm'}}
                         </p>
                     </mat-cell>
-                </ng-container>                
+                </ng-container>
 
                 <!-- Marketplace -->
                 <ng-container matColumnDef="marketplace">
                     <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>
-                        <select
-                            (change)="filterProductsMarketplaces($event)">
+                        <select (change)="filterProductsMarketplaces($event)">
                             <option value='all'>Marketplace</option>
                             <option *ngFor='let channel of channels' [value]='channel'>{{channel}}</option>
-                        </select>                 
+                        </select>
                     </mat-header-cell>
                     <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
                         <p class="text-truncate">
@@ -102,11 +141,10 @@
                 <!-- Status -->
                 <ng-container matColumnDef="status">
                     <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>
-                        <select
-                            (change)="filterProductsStatus($event)">
+                        <select (change)="filterProductsStatus($event)">
                             <option value='all'>Status</option>
-                            <option *ngFor='let status of statuses' [value]='status.code'>{{status.label}}</option>
-                        </select>                
+                            <option *ngFor='let status of statuses; let i = index;' [value]='status.code' [selected]='status.code == selectedStatus'>{{status.label}}</option>
+                        </select>
                     </mat-header-cell>
                     <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
                         <p class="text-truncate" *ngIf='order.status !== null'>
@@ -120,11 +158,10 @@
                 <mat-row *matRowDef="let order; columns: displayedColumns;" class="order" matRipple
                     [routerLink]="'/apps/e-commerce/orders/'+order.code">
                 </mat-row>
-            </mat-table>
 
-            <mat-paginator #paginator [length]="dataSource.filteredData.length" [pageIndex]="0" [pageSize]="10"
-                [pageSizeOptions]="[5, 10, 25, 100]">
-            </mat-paginator>
+                <mat-footer-row *matFooterRowDef="['code']; sticky: true"></mat-footer-row>
+
+            </mat-table>
 
         </div>
         <!-- / CONTENT CARD -->

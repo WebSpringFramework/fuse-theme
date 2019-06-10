@@ -78,7 +78,7 @@ e-commerce-orders {
         overflow: auto;
         -webkit-overflow-scrolling: touch;
 
-        .mat-header-row {
+        .mat-header-row, .mat-footer-row {
             min-height: 64px;
         }
 
@@ -129,5 +129,22 @@ e-commerce-orders {
         .active-icon {
             border-radius: 50%;
         }
+
+        .mat-footer-row {
+            .paginacao {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                min-height: 56px;
+                padding: 0 8px;
+                flex-wrap: wrap-reverse;
+                width: 100%;
+            }
+            
+            svg.mat-paginator-icon {
+                width: 25px;
+                fill: currentColor;
+            }
+        }        
     }
 }

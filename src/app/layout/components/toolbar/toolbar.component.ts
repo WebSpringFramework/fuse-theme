@@ -27,6 +27,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
     navigation: any;
     selectedLanguage: any;
     userStatusOptions: any[];
+    ACCESS_EMAIL:any;
 
     // Private
     private _unsubscribeAll: Subject<any>;
@@ -46,6 +47,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
         private _router: Router
     )
     {
+        this.ACCESS_EMAIL = sessionStorage.getItem('ACCESS_EMAIL');
         // Set the defaults
         this.userStatusOptions = [
             {
