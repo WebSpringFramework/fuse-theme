@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
+
+import { environment } from './../../../../../environments/environment';
+import { HeadersService } from '@fuse/services/headers.service';
 
 @Injectable()
 export class EcommerceOrderService implements Resolve<any>
@@ -10,26 +13,17 @@ export class EcommerceOrderService implements Resolve<any>
     order: any;
     onOrderChanged: BehaviorSubject<any>;
 
-    /**
-     * Constructor
-     *
-     * @param {HttpClient} _httpClient
-     */
+    private readonly API = `${environment.baseURL}/orders`;
+
     constructor(
-        private _httpClient: HttpClient
+        private _httpClient: HttpClient,
+        private _headerService: HeadersService
     )
     {
         // Set the defaults
         this.onOrderChanged = new BehaviorSubject({});
     }
 
-    /**
-     * Resolver
-     *
-     * @param {ActivatedRouteSnapshot} route
-     * @param {RouterStateSnapshot} state
-     * @returns {Observable<any> | Promise<any> | any}
-     */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> | Promise<any> | any
     {
         this.routeParams = route.params;
@@ -47,72 +41,29 @@ export class EcommerceOrderService implements Resolve<any>
         });
     }
 
-    /**
-     * Get order
-     *
-     * @returns {Promise<any>}
-     */
-    // getOrder(): Promise<any>
-    // {
-    //     return new Promise((resolve, reject) => {
-    //         this._httpClient.get('api/e-commerce-orders/' + this.routeParams.id)
-    //             .subscribe((response: any) => {
-    //                 this.order = response;
-    //                 this.onOrderChanged.next(this.order);
-    //                 resolve(response);
-    //             }, reject);
-    //     });
-    // }
-    getOrder(): Promise<any>
-    {
+    getOrder() {
         return new Promise((resolve, reject) => {
-            let email = sessionStorage.getItem('ACCESS_EMAIL');
-            let passw = sessionStorage.getItem('ACCESS_PASSW');
-            let headers = new HttpHeaders()
-            .set('X-User-Email', email)
-            .set('X-Api-Key', passw)
-            .set('X-Accountmanager-Key', 'xk21bPa9jQ')
-            .set('Accept', 'application/json')
-            .set('Content-Type', 'application/json');
-            this._httpClient.get('https://api.skyhub.com.br/orders/' + this.routeParams.code, {headers})
-                .subscribe((response: any) => {
-                    console.log(response);
-                    this.order = response;
+            
+            let api = `${this.API}/${this.routeParams.code}`;            
+            let headers = this._headerService.getHeaders();
+            
+            this._httpClient.get<any>(api, {headers})
+            .subscribe(
+                (data) => {
+                    // console.log(data);
+
+                    this.order = data;
                     this.onOrderChanged.next(this.order);
-                    resolve(response);
-                }, reject);
-        });        
-    }
-
-    /**
-     * Save order
-     *
-     * @param order
-     * @returns {Promise<any>}
-     */
-    saveOrder(order): Promise<any>
-    {
-        return new Promise((resolve, reject) => {
-            this._httpClient.post('api/e-commerce-orders/' + order.id, order)
-                .subscribe((response: any) => {
-                    resolve(response);
-                }, reject);
-        });
-    }
-
-    /**
-     * Add order
-     *
-     * @param order
-     * @returns {Promise<any>}
-     */
-    addOrder(order): Promise<any>
-    {
-        return new Promise((resolve, reject) => {
-            this._httpClient.post('api/e-commerce-orders/', order)
-                .subscribe((response: any) => {
-                    resolve(response);
-                }, reject);
+                    
+                    resolve(data);
+                },
+                (error) => 
+                {
+                    console.error(error.error.message);
+                    
+                    reject(error);
+                }
+            ); 
         });
     }
 }

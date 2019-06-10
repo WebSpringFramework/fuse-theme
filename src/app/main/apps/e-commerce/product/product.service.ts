@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
+
+import { environment } from './../../../../../environments/environment';
+import { HeadersService } from '@fuse/services/headers.service';
 
 @Injectable()
 export class EcommerceProductService implements Resolve<any>
@@ -10,26 +13,17 @@ export class EcommerceProductService implements Resolve<any>
     product: any;
     onProductChanged: BehaviorSubject<any>;
 
-    /**
-     * Constructor
-     *
-     * @param {HttpClient} _httpClient
-     */
+    private readonly API = `${environment.baseURL}/products`;
+
     constructor(
-        private _httpClient: HttpClient
+        private _httpClient: HttpClient,
+        private _headerService: HeadersService
     )
     {
         // Set the defaults
         this.onProductChanged = new BehaviorSubject({});
     }
 
-    /**
-     * Resolver
-     *
-     * @param {ActivatedRouteSnapshot} route
-     * @param {RouterStateSnapshot} state
-     * @returns {Observable<any> | Promise<any> | any}
-     */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> | Promise<any> | any
     {
         this.routeParams = route.params;
@@ -47,88 +41,29 @@ export class EcommerceProductService implements Resolve<any>
         });
     }
 
-    /**
-     * Get product
-     *
-     * @returns {Promise<any>}
-     */
-    // getProduct(): Promise<any>
-    // {
-    //     return new Promise((resolve, reject) => {
-    //         if ( this.routeParams.id === 'new' )
-    //         {
-    //             this.onProductChanged.next(false);
-    //             resolve(false);
-    //         }
-    //         else
-    //         {
-    //             this._httpClient.get('api/e-commerce-products/' + this.routeParams.id)
-    //                 .subscribe((response: any) => {
-    //                     this.product = response;
-    //                     this.onProductChanged.next(this.product);
-    //                     resolve(response);
-    //                 }, reject);
-    //         }
-    //     });
-    // }
-    
-    getProduct(): Promise<any>
-    {
+    getProduct() {
         return new Promise((resolve, reject) => {
-            if ( this.routeParams.id === 'new' )
-            {
-                this.onProductChanged.next(false);
-                resolve(false);
-            }
-            else
-            {
-                let email = sessionStorage.getItem('ACCESS_EMAIL');
-                let passw = sessionStorage.getItem('ACCESS_PASSW');
-                let headers = new HttpHeaders()
-                .set('X-User-Email', email)
-                .set('X-Api-Key', passw)
-                .set('Accept', 'application/json')
-                .set('Content-Type', 'application/json');
-                this._httpClient.get('https://api.skyhub.com.br/products/' + this.routeParams.sku, {headers})
-                .subscribe((response: any) => {
-                    console.log(response);
-                    this.product = response;
+            
+            let api = `${this.API}/${this.routeParams.sku}`;            
+            let headers = this._headerService.getHeaders();
+            
+            this._httpClient.get<any>(api, {headers})
+            .subscribe(
+                (data) => {
+                    // console.log(data);
+
+                    this.product = data;
                     this.onProductChanged.next(this.product);
-                    resolve(response);
-                }, reject);
-            }            
-        });
-    }
-
-    /**
-     * Save product
-     *
-     * @param product
-     * @returns {Promise<any>}
-     */
-    saveProduct(product): Promise<any>
-    {
-        return new Promise((resolve, reject) => {
-            this._httpClient.post('api/e-commerce-products/' + product.sku, product)
-                .subscribe((response: any) => {
-                    resolve(response);
-                }, reject);
-        });
-    }
-
-    /**
-     * Add product
-     *
-     * @param product
-     * @returns {Promise<any>}
-     */
-    addProduct(product): Promise<any>
-    {
-        return new Promise((resolve, reject) => {
-            this._httpClient.post('api/e-commerce-products/', product)
-                .subscribe((response: any) => {
-                    resolve(response);
-                }, reject);
+                    
+                    resolve(data);
+                },
+                (error) => 
+                {
+                    console.error(error.error.message);
+                    
+                    reject(error);
+                }
+            ); 
         });
     }
 }

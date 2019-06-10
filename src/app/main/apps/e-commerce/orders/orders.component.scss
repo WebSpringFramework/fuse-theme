@@ -15,7 +15,14 @@ e-commerce-orders {
 
             > .header {
 
+                .unstyled::-webkit-inner-spin-button,
+                .unstyled::-webkit-clear-button {
+                    display: none;
+                    -webkit-appearance: none;
+                }
+
                 .search-wrapper {
+                    margin-bottom: 5px;
                     width: 100%;
                     max-width: 480px;
                     border-radius: 28px;

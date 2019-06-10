@@ -32,12 +32,12 @@
                     <div class="h2" *ngIf="pageType ==='edit'">
                         {{product.name}}
                     </div>
-                    <div class="h2" *ngIf="pageType ==='new'">
+                    <!-- <div class="h2" *ngIf="pageType ==='new'">
                         Novo Produto
                     </div>
                     <div class="subtitle secondary-text">
                         <span>Detalhes do Produto</span>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <!-- / APP TITLE -->
@@ -144,10 +144,10 @@
                                     <mat-label>Atributos</mat-label>
 
                                     <mat-chip-list name="specifications" formControlName="specifications">
-                                        <ul>
+                                        <ul class="atributos">
                                             <ng-container *ngFor="let specification of product.specifications">
                                                 <li *ngIf="specification.value !== null">
-                                                    <strong>{{specification.key}}</strong> : {{specification.value}}
+                                                    <strong>{{specification.key}}</strong>: {{specification.value}}
                                                 </li> 
                                             </ng-container>
                                         </ul>

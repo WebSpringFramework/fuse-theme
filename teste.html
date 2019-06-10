@@ -1,0 +1,40 @@
+<script>
+    function teste() {
+
+        var data = null;
+
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = false;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log(this.responseText);
+            }
+        });
+
+        xhr.open("GET", "https://api.skyhub.com.br/sale_systems");
+        
+        xhr.setRequestHeader("X-User-Email", "raphael@placecomunicacao.com.br");
+        xhr.setRequestHeader("X-Api-Key", "GmTPDQwhEgySHb_WJezo");
+        xhr.setRequestHeader("X-Accountmanager-Key", "xk21bPa9jQ");        
+        
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Access-Control-Allow-Origin", "application/json");
+        xhr.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+        xhr.setRequestHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");          
+
+        xhr.send(data);
+    }
+</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="teste()">TESTE</button>
+</body>
+</html>

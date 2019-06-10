@@ -224,7 +224,7 @@
                                             </td>
                                             <td>
                                                 <span class="text-truncate">
-                                                    {{order.payments.transaction_date | date}}
+                                                    {{order.payments.transaction_date | date:'d/MM/yy hh:mm'}}
                                                 </span>
                                             </td>
                                         </tr>
@@ -265,7 +265,7 @@
                                                 {{order.shipping_address.street}} - {{order.shipping_address.number}}
                                             </td>                                            
                                             <td>
-                                                {{order.shipped_date}}
+                                                {{order.shipped_date | date:'d/MM/yy hh:mm'}}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -324,7 +324,7 @@
                                     <div class="card">
 
                                         <div class="header">
-                                            <div class="invoice-date">{{order.date}}</div>
+                                            <div class="invoice-date">{{order.date | date:'d/MM/yy hh:mm'}}</div>
 
                                             <div fxLayout="row" fxLayoutAlign="space-between stretch">
                                                 <div class="client">

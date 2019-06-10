@@ -36,7 +36,7 @@ export const navigation: FuseNavigation[] = [
                 translate: 'NAV.ECOMMERCE',
                 type     : 'collapsable',
                 icon     : 'shopping_cart',
-                children : [
+                children : [                    
                     {
                         id        : 'products',
                         title     : 'Produtos',
@@ -51,41 +51,43 @@ export const navigation: FuseNavigation[] = [
                         type      : 'item',
                         url       : '/apps/e-commerce/orders',
                         exactMatch: true
+                    },
+
+                    {
+                        id        : 'categories',
+                        title     : 'Categorias',
+                        type      : 'item',
+                        url       : '/apps/e-commerce/categories',
+                        exactMatch: true
+                    },                    
+
+                    {
+                        id        : 'statuses',
+                        title     : 'Status',
+                        type      : 'item',
+                        url       : '/apps/e-commerce/statuses',
+                        exactMatch: true
                     }
                 ]
-            },
-
-            {
-                id       : 'categories',
-                title    : 'Categories',
-                translate: 'NAV.CATEGORIES',
-                type     : 'collapsable',
-                icon     : 'shopping_cart',
-            },         
+            },      
             
             {
                 id       : 'marketplaces',
                 title    : 'Marketplaces',
                 translate: 'NAV.MARKETPLACES',
-                type     : 'collapsable',
-                icon     : 'shopping_cart',
-            },         
-            
-            {
-                id       : 'statuses',
-                title    : 'Status',
-                translate: 'NAV.STATUSES',
-                type     : 'collapsable',
-                icon     : 'shopping_cart',
-            },         
+                type     : 'item',
+                icon     : 'business_center',
+                url      : '/apps/marketplaces',
+                exactMatch: true                    
+            },                 
             
             {
                 id       : 'questions',
                 title    : 'Questions',
                 translate: 'NAV.QUESTIONS',
                 type     : 'item',
-                icon     : 'shopping_cart',
-                url       : '/apps/questions',
+                icon     : 'question_answer',
+                url       : '/apps/asking/questions',
                 exactMatch: true                
             },                
         ]

@@ -1,37 +1,49 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+import { environment } from './../../../../../environments/environment';
+import { HeadersService } from '@fuse/services/headers.service';
+
 @Injectable()
-export class EcommerceOrdersService implements Resolve<any>
-{
+export class EcommerceOrdersService implements Resolve<any> {
+
     pages: any;
     orders: any[];
     onOrdersChanged: BehaviorSubject<any>;
 
-    /**
-     * Constructor
-     *
-     * @param {HttpClient} _httpClient
-     */
-    constructor(
-        private _httpClient: HttpClient
-    )
-    {
-        // Set the defaults
+    dateStart: any;
+    dateEnd: any;
+    marketplace: any;
+    status: any;
+
+    channels: any;
+    statuses: any;
+
+    private readonly API = `${environment.baseURL}/orders`;
+    private readonly API_MARKETPLACES = `${environment.baseURL}/sale_systems`;
+    private readonly API_STATUSES = `${environment.baseURL}/statuses`;
+
+    constructor(private _httpClient: HttpClient, private _headerService: HeadersService) {
         this.onOrdersChanged = new BehaviorSubject({});
+        var now = new Date();
+        this.dateStart = this.formatDate(now);
+        this.dateEnd = this.formatDate(now);
+        this.marketplace = 'all';
+        this.status = 'all';
+
+        this.getMarketplaces();
+        this.getStatuses();
     }
 
-    /**
-     * Resolver
-     *
-     * @param {ActivatedRouteSnapshot} route
-     * @param {RouterStateSnapshot} state
-     * @returns {Observable<any> | Promise<any> | any}
-     */
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> | Promise<any> | any
-    {
+    formatDate(date) {
+        function twoDigit(n) { return (n < 10 ? '0' : '') + n; }
+        
+        return `${twoDigit(date.getDate())}/${twoDigit(date.getMonth() + 1)}/${date.getFullYear()}`;
+    }
+
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> | Promise<any> | any {
         return new Promise((resolve, reject) => {
 
             Promise.all([
@@ -43,66 +55,125 @@ export class EcommerceOrdersService implements Resolve<any>
                 reject
             );
         });
+    } 
+    
+    filterPage(page){
+        this.getOrders(page, 100, this.dateStart, this.dateEnd, this.marketplace, this.status);
+    }
+    
+    filterStatus(statuses){
+        this.status = statuses;
+        return this.getOrders(1, 100, this.dateStart, this.dateEnd, this.marketplace, statuses);
     }
 
-    /**
-     * Get orders
-     *
-     * @returns {Promise<any>}
-     */
-    // getOrders(): Promise<any>
-    // {
-    //     return new Promise((resolve, reject) => {
-    //         this._httpClient.get('api/e-commerce-orders')
-    //             .subscribe((response: any) => {
-    //                 this.orders = response;
-    //                 this.onOrdersChanged.next(this.orders);
-    //                 resolve(response);
-    //             }, reject);
-    //     });
-    // } 
-    
-    getOrders(page = 1, startDate = '27/05/2019', endDate = '27/05/2019', perPage = 100): Promise<any>
-    {
+    filterMarketplace(marketplace){
+        this.marketplace = marketplace;
+        return this.getOrders(1, 100, this.dateStart, this.dateEnd, marketplace, this.status);
+    }
+
+    filterDate(dateEnd) {
+        //console.log(new Date(dateEnd));
+        this.dateEnd = this.formatDate(new Date(dateEnd));
+        return this.getOrders(1, 100, this.dateStart, this.dateEnd, this.marketplace, this.status);
+    }
+
+    setDateStart(dateStart) {
+        //console.log(new Date(dateStart));
+        this.dateStart = this.formatDate(new Date(dateStart));        
+    }
+
+    getMarketplaces() {
+        let headers = this._headerService.getHeaders();
+        this._httpClient.get<any>(this.API_MARKETPLACES, {headers})
+        .subscribe(
+            (data) => {
+                console.log(data);
+                
+                this.channels = data;
+            },
+            (error) => 
+            {
+                console.error(error.error.message);
+            }
+        );    
+    }
+
+    getStatuses() {
+        let headers = this._headerService.getHeaders();
+        this._httpClient.get<any>(this.API_STATUSES, {headers})
+        .subscribe(
+            (data) => {
+                console.log(data);
+                
+                this.statuses = data;
+            },
+            (error) => 
+            {
+                console.error(error.error.message);
+            }
+        );    
+    }
+
+    getOrders(page = 1, per_page = 100, start_date = this.dateStart, end_date = this.dateEnd, channel = this.marketplace, statuses = this.status) {
         return new Promise((resolve, reject) => {
-            let email = sessionStorage.getItem('ACCESS_EMAIL');
-            let passw = sessionStorage.getItem('ACCESS_PASSW');
-            let headers = new HttpHeaders()
-            .set('X-User-Email', email)
-            .set('X-Api-Key', passw)
-            .set('X-Accountmanager-Key', 'xk21bPa9jQ')
-            .set('Accept', 'application/json')
-            .set('Content-Type', 'application/json');
-            this._httpClient.get(`https://api.skyhub.com.br/orders?filters[start_date]=${startDate}&filters[end_date]=${endDate}&page=${page}&per_page=${perPage}`, {headers})
-                .subscribe((response: any) => {
-                    console.log(response);
-                    this.orders = response.orders;
-                    this.pages = Math.ceil(response.total / perPage);
-                    // console.log('pages', this.pages);
+            
+            let api = `${this.API}?filters[start_date]=${start_date}&filters[end_date]=${end_date}&page=${page}&per_page=${per_page}`;
+            
+            if(this.marketplace !== 'all') {
+                api += `&filters[sale_systems][]=${channel}`;
+            }
+
+            if(this.status !== 'all') {
+                api += `&filters[statuses][]=${statuses}`;
+            }            
+            
+            let headers = this._headerService.getHeaders();
+            
+            this._httpClient.get<any>(api, {headers})
+            .subscribe(
+                (data) => {
+                    console.log(data);
+                    
+                    this.orders = data.orders;                    
+                    this.pages = Math.ceil(data.total / 100);                    
                     this.onOrdersChanged.next(this.orders);
-                    resolve(response.orders);
-                }, reject);
+
+                    resolve(data.orders);
+                },
+                (error) => 
+                {
+                    console.error(error.error.message);
+                    
+                    reject(error);
+                }
+            ); 
         });
-    }  
-    
-    searchOrderCODE(CODE): Promise<any> {
+    }
+
+    searchOrder(CODE) {
         return new Promise((resolve, reject) => {
-            let email = sessionStorage.getItem('ACCESS_EMAIL');
-            let passw = sessionStorage.getItem('ACCESS_PASSW');
-            let headers = new HttpHeaders()
-                .set('X-User-Email', email)
-                .set('X-Api-Key', passw)
-                .set('Accept', 'application/json')
-                .set('Content-Type', 'application/json');
-            this._httpClient.get('https://api.skyhub.com.br/orders/' + CODE, { headers })
-            .subscribe((response: any) => {
-                console.log(response);
-                this.orders = [response];
-                this.pages = 1;
-                // console.log('pages', this.pages);
-                this.onOrdersChanged.next(this.orders);
-                resolve(response);
-            }, reject);
+
+            let api = `${this.API}/${CODE}`;
+            let headers = this._headerService.getHeaders();
+            
+            return this._httpClient.get<any>(api, {headers})
+            .subscribe(
+                (data) => {
+                    //console.log(data);
+                    
+                    this.orders = [data];                    
+                    this.pages = 1;                    
+                    this.onOrdersChanged.next(this.orders);
+
+                    resolve(data.orders);
+                },
+                (error) => 
+                {
+                    console.error(error.error.message);
+                    
+                    reject(error);
+                }
+            ); 
         });
-    }         
+    }
 }

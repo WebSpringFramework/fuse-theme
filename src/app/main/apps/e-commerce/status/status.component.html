@@ -1,0 +1,95 @@
+<div id="status" class="page-layout carded fullwidth inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- HEADER -->
+        <div class="header accent" fxLayout="row" fxLayoutAlign="space-between center">
+
+            <!-- APP TITLE -->
+            <div fxLayout="row" fxLayoutAlign="start center">
+
+                <button mat-icon-button class="mr-0 mr-sm-16" [routerLink]="'/apps/e-commerce/statuses'">
+                    <mat-icon>arrow_back</mat-icon>
+                </button>
+
+                <div class="logo mb-24 mb-sm-0" fxLayout="row" fxLayoutAlign="start center">
+                    <mat-icon class="logo-icon s-32 mr-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
+                        shopping_cart
+                    </mat-icon>
+                    <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">{{ pageType === 'new' ? 'Novo' : 'Editar' }} Status</span>
+                </div>
+            </div>
+            <!-- / APP TITLE -->
+
+            <button mat-raised-button class="save-status-button"
+                *ngIf="pageType === 'new'" (click)="addStatus()">
+                <span>ADICIONAR</span>
+            </button>
+
+            <button mat-raised-button class="save-status-button"
+                *ngIf="pageType === 'edit'"
+                (click)="saveStatus()">
+                <span>SALVAR</span>
+            </button>
+        </div>
+        <!-- / HEADER -->
+
+        <!-- CONTENT CARD -->
+        <div class="content-card">
+
+            <!-- <form name="statusForm" [formGroup]="statusForm" class="status w-100-p" fxLayout="column" fxFlex> -->
+            
+                <mat-table class="satatus-table" #table matSort [@animateStagger]="{value:'50'}"
+                fusePerfectScrollbar>
+
+                <!-- Code Column -->
+                <ng-container matColumnDef="code">
+                    <mat-header-cell *matHeaderCellDef>
+                        <input [disabled]="pageType === 'edit'" type="text" name="code" placeholder="Digite o Código" [(ngModel)]="code" />
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let satatus">
+                        <p class="text-truncate"></p>
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <mat-header-cell *matHeaderCellDef>
+                        <input type="text" name="label" placeholder="Digite o Nome" [(ngModel)]="label" />
+                    </mat-header-cell>
+                </ng-container>
+
+                <!-- Type Column -->
+                <ng-container matColumnDef="type">
+                    <mat-header-cell *matHeaderCellDef>
+                        <select [(ngModel)]="type">
+                            <option value='all'>Selecion o Tipo</option>
+                            <option *ngFor='let status of statusTypes' [value]='status'>{{status}}</option>
+                        </select>
+                    </mat-header-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></mat-header-row>
+
+
+                <mat-row *matRowDef="let statuses; columns: displayedColumns;" 
+                            class="status" 
+                            matRipple
+                >
+                </mat-row>
+            </mat-table>
+
+            <!-- </form> -->
+
+        </div>
+        <!-- / CONTENT CARD -->
+
+    </div>
+    <!-- / CENTER -->
+
+</div>

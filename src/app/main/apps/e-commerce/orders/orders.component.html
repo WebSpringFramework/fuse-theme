@@ -14,38 +14,36 @@
             <!-- APP TITLE -->
             <div class="logo mb-24 mb-sm-0" fxLayout="row" fxLayoutAlign="start center">
                 <mat-icon class="logo-icon s-32 mr-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
-                    shopping_basket
+                    shopping_cart
                 </mat-icon>
                 <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">Meus Pedidos</span>
             </div>
-            <!-- / APP TITLE -->
+            <!-- / APP TITLE -->            
 
             <!-- SEARCH -->
             <div class="search-wrapper  ml-sm-32">
                 <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
                     <mat-icon (click)="searchOrderCODE()">search</mat-icon>
-                    <input (keyup.enter)="searchOrderCODE()" placeholder="Buscar Pedido" [(ngModel)]="CODE">
+                    <input (keyup.enter)="searchOrderCODE()" placeholder="Buscar Pedido por Código" [(ngModel)]="CODE">
                 </div>
             </div>
             <!-- / SEARCH -->
 
-            <!-- DATEPICKER -->
+            <!-- DATE START -->
             <div class="search-wrapper  ml-sm-32">
                 <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
-                    <input type="date" name="dateStart" max="1979-12-31" [(ngModel)]="dateStart" value="27/05/2019">
-                    <input type="date" name="dateEnd" min="2000-01-02" [(ngModel)]="dateEnd" value="27/05/2019">
+                    <input class="unstyled" type="date" [value]="dateStart" (change)="filterProductsDateStart($event)" />
                 </div>
             </div>
-            <!-- / DATEPICKER -->
+            <!-- / DATE START -->
 
-            <!-- PAGES -->
+            <!-- DATE END -->
             <div class="search-wrapper  ml-sm-32">
-                <select class="search" fxFlex fxLayout="row" fxLayoutAlign="start center"
-                    (change)="SelectChangingValue($event)">
-                    <option *ngFor='let number of numbers' [value]='number'>Página {{number}}</option>
-                </select>
+                <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
+                    <input class="unstyled" type="date" [value]="dateEnd" (change)="filterProductsDateEnd($event)" />
+                </div>
             </div>
-            <!-- / PAGES -->
+            <!-- / DATE END -->
 
         </div>
         <!-- / HEADER -->
@@ -56,35 +54,17 @@
             <mat-table class="orders-table" #table [dataSource]="dataSource" matSort [@animateStagger]="{value:'50'}"
                 fusePerfectScrollbar>
 
-                <!-- ID Column -->
+                <!-- Código -->
                 <ng-container matColumnDef="code">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header>Código</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef>Código</mat-header-cell>
                     <mat-cell *matCellDef="let order">
                         <p class="text-truncate">{{order.code}}</p>
                     </mat-cell>
                 </ng-container>
 
-                <!-- Reference Column -->
-                <!-- <ng-container matColumnDef="reference">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-sm>Código Integração</mat-header-cell>
-                    <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
-                        <p class="text-truncate">{{order.import_info.remote_code}}</p>
-                    </mat-cell>
-                </ng-container> -->
-
-                <!-- Name Column -->
-                <ng-container matColumnDef="customer">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</mat-header-cell>
-                    <mat-cell *matCellDef="let order">
-                        <p class="text-truncate">
-                            {{order.customer.name}}
-                        </p>
-                    </mat-cell>
-                </ng-container>
-
-                <!-- Total Price Column -->
+                <!-- Valor Pedido -->
                 <ng-container matColumnDef="total">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-md>Valor Pedido
+                    <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-md>Valor Pedido
                     </mat-header-cell>
                     <mat-cell *matCellDef="let order" fxHide fxShow.gt-md>
                         <p class="total-price text-truncate">
@@ -93,9 +73,25 @@
                     </mat-cell>
                 </ng-container>
 
-                <!-- Marketplace Column -->
+                <!-- Data -->
+                <ng-container matColumnDef="date">
+                    <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>Data</mat-header-cell>                   
+                    <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
+                        <p class="text-truncate">
+                            {{order.updated_at | date:'d/MM/yy hh:mm'}}
+                        </p>
+                    </mat-cell>
+                </ng-container>                
+
+                <!-- Marketplace -->
                 <ng-container matColumnDef="marketplace">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-sm>Marketplace</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>
+                        <select
+                            (change)="filterProductsMarketplaces($event)">
+                            <option value='all'>Marketplace</option>
+                            <option *ngFor='let channel of channels' [value]='channel'>{{channel}}</option>
+                        </select>                 
+                    </mat-header-cell>
                     <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
                         <p class="text-truncate">
                             {{order.channel}}
@@ -103,32 +99,18 @@
                     </mat-cell>
                 </ng-container>
 
-                <!-- Payment Column -->
-                <!-- <ng-container matColumnDef="payment">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-sm>Pagamento</mat-header-cell>
-                    <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
-                        <p class="text-truncate">
-                            {{order.payments.method}}
-                        </p>
-                    </mat-cell>
-                </ng-container> -->
-
-                <!-- Status Column -->
+                <!-- Status -->
                 <ng-container matColumnDef="status">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
-                    <mat-cell *matCellDef="let order">
-                        <p class="status text-truncate h6 p-4" [ngClass]="order.status.code">
-                            {{order.status.label}}
-                        </p>
-                    </mat-cell>
-                </ng-container>
-
-                <!-- Date Column -->
-                <ng-container matColumnDef="date">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-sm>Date</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>
+                        <select
+                            (change)="filterProductsStatus($event)">
+                            <option value='all'>Status</option>
+                            <option *ngFor='let status of statuses' [value]='status.code'>{{status.label}}</option>
+                        </select>                
+                    </mat-header-cell>
                     <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
-                        <p class="text-truncate">
-                            {{order.updated_at | date:'mm/dd/yyyy hh:mm:ss'}}
+                        <p class="text-truncate" *ngIf='order.status !== null'>
+                            {{order.status.label}}
                         </p>
                     </mat-cell>
                 </ng-container>

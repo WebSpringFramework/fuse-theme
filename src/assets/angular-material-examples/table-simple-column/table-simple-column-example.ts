@@ -63,7 +63,7 @@ export class TableSimpleColumnExample implements OnInit {
   selector: 'simple-column',
   template: `
     <ng-container matColumnDef>
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{label || name}} </th>
+      <th mat-header-cell *matHeaderCellDef> {{label || name}} </th>
       <td mat-cell *matCellDef="let data"> {{getData(data)}}</td>
     </ng-container>
   `,

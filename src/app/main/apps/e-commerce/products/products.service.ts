@@ -1,34 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+import { environment } from './../../../../../environments/environment';
+import { HeadersService } from '@fuse/services/headers.service';
+
 @Injectable()
-export class EcommerceProductsService implements Resolve<any>
-{
+export class EcommerceProductsService implements Resolve<any> {
+
     pages: any;
     products: any[];
     onProductsChanged: BehaviorSubject<any>;
 
-    /**
-     * Constructor
-     *
-     * @param {HttpClient} _httpClient
-     */
-    constructor(
-        private _httpClient: HttpClient
-    ) {
-        // Set the defaults
+    private readonly API = `${environment.baseURL}/products`;
+
+    constructor(private _httpClient: HttpClient, private _headerService: HeadersService) {
         this.onProductsChanged = new BehaviorSubject({});
     }
 
-    /**
-     * Resolver
-     *
-     * @param {ActivatedRouteSnapshot} route
-     * @param {RouterStateSnapshot} state
-     * @returns {Observable<any> | Promise<any> | any}
-     */
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> | Promise<any> | any {
         return new Promise((resolve, reject) => {
 
@@ -41,66 +31,59 @@ export class EcommerceProductsService implements Resolve<any>
                 reject
             );
         });
-    }
-
-    /**
-     * Get products
-     *
-     * @returns {Promise<any>}
-     */
-    // getProducts(): Promise<any>
-    // {
-    //     return new Promise((resolve, reject) => {
-    //         this._httpClient.get('api/e-commerce-products')
-    //             .subscribe((response: any) => {
-    //                 this.products = response;
-    //                 this.onProductsChanged.next(this.products);
-    //                 resolve(response);
-    //             }, reject);
-    //     });
-    // }
-
-    getProducts(page = 1, perPage = 100): Promise<any> {
-        return new Promise((resolve, reject) => {
-            let email = sessionStorage.getItem('ACCESS_EMAIL');
-            let passw = sessionStorage.getItem('ACCESS_PASSW');
-            let headers = new HttpHeaders()
-                .set('X-User-Email', email)
-                .set('X-Api-Key', passw)
-                .set('X-Accountmanager-Key', 'xk21bPa9jQ')
-                .set('Accept', 'application/json')
-                .set('Content-Type', 'application/json');
-            this._httpClient.get(`https://api.skyhub.com.br/products?page=${page}&per_page=${perPage}`, { headers })
-                .subscribe((response: any) => {
-                    // console.log('getProducts', response);
-                    this.products = response.products;
-                    this.pages = Math.ceil(response.total / perPage);
-                    // console.log('pages', this.pages);
-                    this.onProductsChanged.next(this.products);
-                    resolve(response.products);
-                }, reject);
-        });
-    }
-
-
-    searchProductSKU(SKU): Promise<any> {
-        return new Promise((resolve, reject) => {
-            let email = sessionStorage.getItem('ACCESS_EMAIL');
-            let passw = sessionStorage.getItem('ACCESS_PASSW');
-            let headers = new HttpHeaders()
-                .set('X-User-Email', email)
-                .set('X-Api-Key', passw)
-                .set('Accept', 'application/json')
-                .set('Content-Type', 'application/json');
-            this._httpClient.get('https://api.skyhub.com.br/products?filters[sku]=' + SKU, { headers })
-            .subscribe((response: any) => {
-                // console.log('getProducts', response);
-                this.products = response.products;
-                this.pages = Math.ceil(response.total / 100);
-                // console.log('pages', this.pages);
-                this.onProductsChanged.next(this.products);
-                resolve(response.products);
-            }, reject);
-        });
     }    
+
+    getProducts(page = 1, per_page = 100) {
+        return new Promise((resolve, reject) => {
+            
+            let api = `${this.API}?page=${page}&per_page=${per_page}&filters[status]=enabled`;
+            let headers = this._headerService.getHeaders();
+            
+            this._httpClient.get<any>(api, {headers})
+            .subscribe(
+                (data) => {
+                    //console.log(data);
+                    
+                    this.products = data.products;                    
+                    this.pages = Math.ceil(data.total / 100);                    
+                    this.onProductsChanged.next(this.products);
+
+                    resolve(data.products);
+                },
+                (error) => 
+                {
+                    console.error(error.error.message);
+                    
+                    reject(error);
+                }
+            ); 
+        });
+    }
+
+    searchProduct(SKU) {
+        return new Promise((resolve, reject) => {
+
+            let api = `${this.API}?page=1&filters[status]=enabled&filters[sku]=${SKU}`;
+            let headers = this._headerService.getHeaders();
+            
+            return this._httpClient.get<any>(api, {headers})
+            .subscribe(
+                (data) => {
+                    //console.log(data);
+                    
+                    this.products = data.products;                    
+                    this.pages = Math.ceil(data.total / 100);                    
+                    this.onProductsChanged.next(this.products);
+
+                    resolve(data.products);
+                },
+                (error) => 
+                {
+                    console.error(error.error.message);
+                    
+                    reject(error);
+                }
+            ); 
+        });
+    }
 }

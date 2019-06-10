@@ -1,0 +1,10 @@
+{
+    "/skyhubapi": {
+        "target": "https://api.skyhub.com.br",
+        "secure": false,
+        "pathRewrite": {
+        "^/skyhubapi": ""
+        },
+        "changeOrigin": true
+    }
+}

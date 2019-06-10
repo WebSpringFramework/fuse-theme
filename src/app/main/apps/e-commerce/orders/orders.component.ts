@@ -1,17 +1,13 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatPaginator, MatSort } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
-import { BehaviorSubject, fromEvent, merge, Observable, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { fuseAnimations } from '@fuse/animations';
 import { FuseUtils } from '@fuse/utils';
 
 import { EcommerceOrdersService } from 'app/main/apps/e-commerce/orders/orders.service';
-import { takeUntil } from 'rxjs/internal/operators';
-
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
 
 @Component({
     selector     : 'e-commerce-orders',
@@ -22,11 +18,14 @@ import { Router } from '@angular/router';
 })
 export class EcommerceOrdersComponent implements OnInit, OnDestroy
 {
+    dateStart: any;
+    dateEnd: any;
+    statuses: any;
+    channels: any;
     CODE = '';
-    numbers = [];
+    pages: any;
     dataSource: FilesDataSource | null;
-    // displayedColumns = ['id', 'reference', 'customer', 'total', 'payment', 'status', 'date'];
-    displayedColumns = ['code', 'customer', 'total', 'marketplace', 'date'];
+    displayedColumns = ['code', 'total', 'date', 'marketplace', 'status'];
 
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
@@ -37,6 +36,7 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
     @ViewChild(MatSort)
     sort: MatSort;
 
+
     // Private
     private _unsubscribeAll: Subject<any>;
 
@@ -46,13 +46,18 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
      * @param {EcommerceOrdersService} _ecommerceOrdersService
      */
     constructor(
-        private _ecommerceOrdersService: EcommerceOrdersService,
-        private _httpClient: HttpClient,
-        private _router: Router,
+        private _ecommerceOrdersService: EcommerceOrdersService
     )
     {
         // Set the private defaults
         this._unsubscribeAll = new Subject();
+
+        this.channels = this._ecommerceOrdersService.channels;
+
+        this.statuses = this._ecommerceOrdersService.statuses;
+
+        this.dateStart = this._ecommerceOrdersService.dateStart;
+        this.dateStart = this._ecommerceOrdersService.dateEnd;
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -66,32 +71,43 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
     {        
         this.dataSource = new FilesDataSource(this._ecommerceOrdersService, this.paginator, this.sort);
         // console.log('dataSource.filteredData.length', this.dataSource.filteredData.length);
-        let pages = this._ecommerceOrdersService.pages;
-        this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
+        this.pages = this._ecommerceOrdersService.pages;
+        // this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
         // console.log('numbers',this.numbers);        
-
-        fromEvent(this.filter.nativeElement, 'keyup')
-            .pipe(
-                takeUntil(this._unsubscribeAll),
-                debounceTime(150),
-                distinctUntilChanged()
-            )
-            .subscribe(() => {
-                if ( !this.dataSource )
-                {
-                    return;
-                }
-                this.dataSource.filter = this.filter.nativeElement.value;
-            });
     }
 
     searchOrderCODE(): void {
-        this._ecommerceOrdersService.searchOrderCODE(this.CODE);
+        this._ecommerceOrdersService.searchOrder(this.CODE);
     }
 
-    SelectChangingValue(event): any {
+    filterProductsPage(event): any {
         // console.log(event.target.value);
-        this._ecommerceOrdersService.getOrders(event.target.value);
+        this._ecommerceOrdersService.filterPage(event.target.value);      
+    }  
+    
+    filterProductsStatus(event): any {
+        this._ecommerceOrdersService.filterStatus(event.target.value).then(() => {
+            this.pages = this._ecommerceOrdersService.pages;
+            //this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
+        });
+    }
+
+    filterProductsMarketplaces(event): any {
+        this._ecommerceOrdersService.filterMarketplace(event.target.value).then(() => {
+            this.pages = this._ecommerceOrdersService.pages;
+            //this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
+        });
+    }
+
+    filterProductsDateStart(event): any {
+        this._ecommerceOrdersService.setDateStart(event.target.value);
+    }
+    
+    filterProductsDateEnd(event): any {
+        this._ecommerceOrdersService.filterDate(event.target.value).then(() => {
+            this.pages = this._ecommerceOrdersService.pages;
+            //this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
+        });
     }
 
     /**
@@ -107,17 +123,9 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
 
 export class FilesDataSource extends DataSource<any>
 {
-    // Private
     private _filterChange = new BehaviorSubject('');
     private _filteredDataChange = new BehaviorSubject('');
 
-    /**
-     * Constructor
-     *
-     * @param {EcommerceOrdersService} _ecommerceOrdersService
-     * @param {MatPaginator} _matPaginator
-     * @param {MatSort} _matSort
-     */
     constructor(
         private _ecommerceOrdersService: EcommerceOrdersService,
         private _matPaginator: MatPaginator,
@@ -225,26 +233,20 @@ export class FilesDataSource extends DataSource<any>
 
             switch ( this._matSort.active )
             {
-                case 'id':
-                    [propertyA, propertyB] = [a.id, b.id];
-                    break;
-                case 'reference':
-                    [propertyA, propertyB] = [a.reference, b.reference];
+                case 'code':
+                    [propertyA, propertyB] = [a.code, b.code];
                     break;
                 case 'customer':
-                    [propertyA, propertyB] = [a.customer.firstName, b.customer.firstName];
+                    [propertyA, propertyB] = [a.customer.name, b.customer.name];
                     break;
                 case 'total':
-                    [propertyA, propertyB] = [a.total, b.total];
+                    [propertyA, propertyB] = [a.total_ordered, b.total_ordered];
                     break;
-                case 'payment':
-                    [propertyA, propertyB] = [a.payment.method, b.payment.method];
-                    break;
-                case 'status':
-                    [propertyA, propertyB] = [a.status[0].name, b.status[0].name];
+                case 'marketplace':
+                    [propertyA, propertyB] = [a.channel, b.channel];
                     break;
                 case 'date':
-                    [propertyA, propertyB] = [a.date, b.date];
+                    [propertyA, propertyB] = [a.updated_at, b.updated_at];
                     break;
             }
 
@@ -262,3 +264,7 @@ export class FilesDataSource extends DataSource<any>
     {
     }
 }
+export interface SatDatepickerRangeValue<D> {
+    begin: D | null;
+    end: D | null;
+  }

@@ -10,9 +10,6 @@ import { FuseUtils } from '@fuse/utils';
 import { EcommerceProductsService } from 'app/main/apps/e-commerce/products/products.service';
 import { takeUntil } from 'rxjs/internal/operators';
 
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
-
 @Component({
     selector: 'e-commerce-products',
     templateUrl: './products.component.html',
@@ -23,9 +20,11 @@ import { Router } from '@angular/router';
 export class EcommerceProductsComponent implements OnInit {
     
     numbers = [];
+    status: string;
     dataSource: FilesDataSource | null;
     displayedColumns = ['id', 'image', 'name'];
     SKU = '';
+    page: any;
 
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
@@ -41,11 +40,10 @@ export class EcommerceProductsComponent implements OnInit {
 
     constructor(
         private _ecommerceProductsService: EcommerceProductsService,
-        private _httpClient: HttpClient,
-        private _router: Router
     ) {
         // Set the private defaults
         this._unsubscribeAll = new Subject();
+        this.status = 'enabled';
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -61,28 +59,16 @@ export class EcommerceProductsComponent implements OnInit {
         let pages = this._ecommerceProductsService.pages;
         this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
         // console.log('numbers',this.numbers);
-
-        fromEvent(this.filter.nativeElement, 'keyup')
-            .pipe(
-                takeUntil(this._unsubscribeAll),
-                debounceTime(150),
-                distinctUntilChanged()
-            )
-            .subscribe(() => {
-                if (!this.dataSource) {
-                    return;
-                }
-
-                this.dataSource.filter = this.filter.nativeElement.value;
-            });
     }
 
     searchProductSKU(): void {
-        this._ecommerceProductsService.searchProductSKU(this.SKU);
+        this._ecommerceProductsService.searchProduct(this.SKU);
     }
 
     SelectChangingValue(event): any {
         // console.log(event.target.value);
+        this.page = event.target.value;
+        // this._ecommerceProductsService.getProducts(event.target.value, this.status);
         this._ecommerceProductsService.getProducts(event.target.value);
     }
 }
@@ -200,18 +186,6 @@ export class FilesDataSource extends DataSource<any>
                     break;
                 case 'name':
                     [propertyA, propertyB] = [a.name, b.name];
-                    break;
-                case 'categories':
-                    [propertyA, propertyB] = [a.categories[0], b.categories[0]];
-                    break;
-                case 'price':
-                    [propertyA, propertyB] = [a.priceTaxIncl, b.priceTaxIncl];
-                    break;
-                case 'quantity':
-                    [propertyA, propertyB] = [a.quantity, b.quantity];
-                    break;
-                case 'active':
-                    [propertyA, propertyB] = [a.active, b.active];
                     break;
             }
 

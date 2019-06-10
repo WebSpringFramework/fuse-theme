@@ -1,0 +1,149 @@
+<div id="question" class="page-layout carded fullwidth inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- HEADER -->
+        <div class="header accent"
+             fxLayout="row" fxLayoutAlign="space-between center">
+
+            <!-- APP TITLE -->
+            <div fxLayout="row" fxLayoutAlign="start center">
+
+                <button mat-icon-button class="mr-16" [routerLink]="'/apps/asking/questions'">
+                    <mat-icon>arrow_back</mat-icon>
+                </button>
+
+                <div fxLayout="column" fxLayoutAlign="start start"
+                     [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">
+                    <div class="h2">
+                        Questão: {{question.code}}
+                    </div>
+                </div>
+            </div>
+            <!-- / APP TITLE -->
+
+        </div>
+        <!-- / HEADER -->
+
+        <!-- CONTENT CARD -->
+        <div class="content-card">
+
+            <!-- CONTENT -->
+            <div class="content">
+
+                <mat-tab-group fxLayout="column" fxFlex>
+
+                    <mat-tab label="Detalhes da Questão">
+
+                        <div class="question-details tab-content p-24" fusePerfectScrollbar>
+
+                            <div class="section pb-48">
+
+                                <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                    <mat-icon class="m-0 mr-16 secondary-text">account_circle</mat-icon>
+                                    <div class="h2 secondary-text">Cliente</div>
+                                </div>
+
+                                <div class="customer mb-32">
+                                    <table class="simple">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div fxLayout="row" fxLayoutAlign="start center">
+                                                        <!-- <img class="avatar" [src]="question.customer.avatar"> -->
+                                                        <span class="name text-truncate">{{question.customer.name}}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <mat-accordion class="addresses">
+
+                                    <mat-expansion-panel>
+
+                                        <mat-expansion-panel-header>
+                                            <mat-panel-title>Pergunta - {{question.created_at | date:'d/MM/yy hh:mm'}}</mat-panel-title>
+                                        </mat-expansion-panel-header>
+
+                                        <div fxFlex fxLayout="column">                                                
+                                            <div class="address">{{question.body}}</div>
+                                        </div>
+
+                                    </mat-expansion-panel>
+
+                                    <mat-expansion-panel>
+
+                                        <mat-expansion-panel-header>
+                                            <mat-panel-title>Resposta - {{question.answer.created_at | date:'d/MM/yy hh:mm'}}</mat-panel-title>
+                                        </mat-expansion-panel-header>
+
+                                        <div fxFlex fxLayout="column">
+                                            <div class="address">{{question.answer.body}}</div>
+                                        </div>
+
+                                    </mat-expansion-panel>
+
+                                </mat-accordion>
+
+                            </div>
+
+                            <div class="section pb-48">
+
+                                <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                    <div class="h2 secondary-text">Informações</div>
+                                </div>
+
+                                <table class="simple">
+                                    <thead>
+                                        <tr>
+                                            <th>Marketplace</th>
+                                            <th>SKU Marketplace</th>
+                                            <th>SKU Produto</th>                                        
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="tracking-code">
+                                                {{question.platform}}
+                                            </td>
+                                            <td>
+                                                {{question.platform_sku}}
+                                            </td>
+                                            <td>
+                                                {{question.product_sku}}
+                                            </td>
+                                            <td>
+                                                {{question.status}}
+                                            </td>                                            
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </mat-tab>
+
+                </mat-tab-group>
+
+            </div>
+            <!-- / CONTENT -->
+
+        </div>
+        <!-- / CONTENT CARD -->
+
+    </div>
+    <!-- / CENTER -->
+</div>
