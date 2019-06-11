@@ -53,15 +53,15 @@ export class Login2Component implements OnInit
      */
     ngOnInit(): void
     {
-        // this.loginForm = this._formBuilder.group({
-        //     email   : ['', [Validators.required, Validators.email]],
-        //     password: ['', Validators.required]
-        // });
-
         this.loginForm = this._formBuilder.group({
-            email   : ['raphael@placecomunicacao.com.br', [Validators.required, Validators.email]],
-            password: ['GmTPDQwhEgySHb_WJezo', Validators.required]
+            email   : ['', [Validators.required, Validators.email]],
+            password: ['', Validators.required]
         });
+
+        // this.loginForm = this._formBuilder.group({
+        //     email   : ['raphael@placecomunicacao.com.br', [Validators.required, Validators.email]],
+        //     password: ['GmTPDQwhEgySHb_WJezo', Validators.required]
+        // });
 
         if(sessionStorage.getItem('ACCESS_EMAIL') && sessionStorage.getItem('ACCESS_PASSW'))
         {

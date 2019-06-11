@@ -57,23 +57,19 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
 
         this.channels = this._ecommerceOrdersService.channels;
 
-        this.statuses = this._ecommerceOrdersService.statuses;
+        this.statuses = this._ecommerceOrdersService.statuses;        
 
-        let now = new Date();
-        let today = this.formatDate(now); 
-
-        this.dateStart = today;
-        this.dateEnd = today;
+        this.dateStart = this.formatDate(new Date(this._ecommerceOrdersService.dateStart));
+        
+        this.dateEnd = this.formatDate(new Date(this._ecommerceOrdersService.dateEnd));
 
         this.selectedStatus = this._ecommerceOrdersService.status;
-
-        console.log('selectedStatus',this.selectedStatus);
     }
 
     formatDate(date) {
         function twoDigit(n) { return (n < 10 ? '0' : '') + n; }
         
-        return `${date.getFullYear()}-${twoDigit(date.getMonth() + 1)}-${twoDigit(date.getDate())}`;
+        return `${date.getFullYear()}-${twoDigit(date.getDate())}-${twoDigit(date.getMonth() + 1)}`;
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -87,6 +83,10 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
     {        
         this.dataSource = new FilesDataSource(this._ecommerceOrdersService, this.sort);
         
+        this.reloadPagination();
+    }
+
+    reloadPagination(){
         this.page = this._ecommerceOrdersService.page;
         this.pages = this._ecommerceOrdersService.pages;
         this.total = this._ecommerceOrdersService.total;
@@ -94,64 +94,63 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
 
     searchOrderCODE(): void {
         this._ecommerceOrdersService.searchOrder(this.CODE).then(() => {
-            this.page = this._ecommerceOrdersService.page;
-            this.pages = this._ecommerceOrdersService.pages;
+            this.reloadPagination();
         });
     }
 
     filterProductsPage(event): any {
-        // console.log(event.target.value);
-        this._ecommerceOrdersService.filterPage(event.target.value);      
+        this._ecommerceOrdersService.filterPage(event.target.value).then(() => {
+            this.reloadPagination();
+        });      
     }  
     
     filterProductsStatus(event): any {
         this._ecommerceOrdersService.filterStatus(event.target.value).then(() => {
-            this.pages = this._ecommerceOrdersService.pages;
-            //this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
+            this.reloadPagination();
         });
     }
 
     filterProductsMarketplaces(event): any {
         this._ecommerceOrdersService.filterMarketplace(event.target.value).then(() => {
-            this.pages = this._ecommerceOrdersService.pages;
-            //this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
+            this.reloadPagination();
         });
     }
 
     filterProductsDateStart(event): any {
+        // console.log('component.ts DateStart',event.target.value);
         this._ecommerceOrdersService.setDateStart(event.target.value);
     }
     
     filterProductsDateEnd(event): any {
+        // console.log('component.ts DateEnd',event.target.value);
         this._ecommerceOrdersService.filterDate(event.target.value).then(() => {
-            this.pages = this._ecommerceOrdersService.pages;
-            //this.numbers = Array(pages).fill(0).map((x,i)=>i+1);
+            this.reloadPagination();
         });
     }
 
     prevPage(): void {
         let p = this.page - 1;
         this._ecommerceOrdersService.getOrders(p).then(() => {
-            this.page = this._ecommerceOrdersService.page;
+            this.reloadPagination();
         });
     }
 
     nextPage(): void {
         let p = this.page + 1;
         this._ecommerceOrdersService.getOrders(p).then(() => {
-            this.page = this._ecommerceOrdersService.page;
+            this.reloadPagination();
         });
     }
 
     firstPage(): void {
         this._ecommerceOrdersService.getOrders(1).then(() => {
-            this.page = this._ecommerceOrdersService.page;
+            this.reloadPagination();
         });
     }
 
     lastPage(): void {
         this._ecommerceOrdersService.getOrders(this.pages).then(() => {
-            this.page = this._ecommerceOrdersService.page;
+            this.reloadPagination();
         });
     }    
 

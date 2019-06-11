@@ -62,7 +62,7 @@ export class EcommerceOrdersService implements Resolve<any> {
     } 
     
     filterPage(page){
-        this.getOrders(page, 100, this.dateStart, this.dateEnd, this.marketplace, this.status);
+        return this.getOrders(page, 100, this.dateStart, this.dateEnd, this.marketplace, this.status);
     }
     
     filterStatus(statuses){
@@ -76,14 +76,16 @@ export class EcommerceOrdersService implements Resolve<any> {
     }
 
     filterDate(dateEnd) {
-        //console.log(new Date(dateEnd));
-        this.dateEnd = this.formatDate(new Date(dateEnd));
-        return this.getOrders(1, 100, this.dateStart, this.dateEnd, this.marketplace, this.status);
+        let data = dateEnd.split('-');    
+        data = `${data[2]}/${data[1]}/${data[0]}`;
+        this.dateEnd = data;              
+        return this.getOrders(1, 100, this.dateStart, data, this.marketplace, this.status);
     }
 
     setDateStart(dateStart) {
-        //console.log(new Date(dateStart));
-        this.dateStart = this.formatDate(new Date(dateStart));        
+        let data = dateStart.split('-');    
+        data = `${data[2]}/${data[1]}/${data[0]}`;
+        return this.dateStart = data;        
     }
 
     getMarketplaces() {
@@ -107,7 +109,7 @@ export class EcommerceOrdersService implements Resolve<any> {
         this._httpClient.get<any>(this.API_STATUSES, {headers})
         .subscribe(
             (data) => {
-                console.log(data);
+                // console.log(data);
                 
                 this.statuses = data;
             },
@@ -129,7 +131,7 @@ export class EcommerceOrdersService implements Resolve<any> {
 
             if(this.status !== 'all') {
                 api += `&filters[statuses][]=${statuses}`;
-            }            
+            }   
             
             let headers = this._headerService.getHeaders();
             

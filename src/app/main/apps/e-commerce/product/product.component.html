@@ -131,7 +131,7 @@
 
                                     <mat-chip-list name="associations" formControlName="associations">
 
-                                        <mat-chip *ngFor="let association of product.associations">
+                                        <mat-chip *ngFor="let association of product.associations" [ngClass]="{verde: association.status == 'linked', vermelho: association.status == 'declined', cinza: association.status == 'waiting_confirmation', amarelo: association.status == 'unlinked'}">
                                             {{association.platform}}
                                         </mat-chip>
 

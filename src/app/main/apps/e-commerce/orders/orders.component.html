@@ -121,7 +121,7 @@
                     <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>Data</mat-header-cell>
                     <mat-cell *matCellDef="let order" fxHide fxShow.gt-sm>
                         <p class="text-truncate">
-                            {{order.updated_at | date:'d/MM/yy hh:mm'}}
+                            {{order.updated_at | date:'dd/MM/yy hh:mm'}}
                         </p>
                     </mat-cell>
                 </ng-container>
