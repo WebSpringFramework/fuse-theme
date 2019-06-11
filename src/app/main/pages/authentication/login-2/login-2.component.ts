@@ -59,8 +59,8 @@ export class Login2Component implements OnInit
         // });
 
         this.loginForm = this._formBuilder.group({
-            email   : ['comercial@belamaga.com', [Validators.required, Validators.email]],
-            password: ['fb1dvh8kDczgvU7QQnXK', Validators.required]
+            email   : ['raphael@placecomunicacao.com.br', [Validators.required, Validators.email]],
+            password: ['GmTPDQwhEgySHb_WJezo', Validators.required]
         });
 
         if(sessionStorage.getItem('ACCESS_EMAIL') && sessionStorage.getItem('ACCESS_PASSW'))

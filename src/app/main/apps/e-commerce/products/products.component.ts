@@ -20,10 +20,11 @@ import { takeUntil } from 'rxjs/internal/operators';
 export class EcommerceProductsComponent implements OnInit {
 
     dataSource: FilesDataSource | null;
-    displayedColumns = ['id', 'image', 'name'];
+    displayedColumns = ['id', 'image', 'name', 'qty', 'price', 'status', 'marketplace'];
     SKU = '';
     page: any;
     pages: any;
+    total: any;
 
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
@@ -60,6 +61,7 @@ export class EcommerceProductsComponent implements OnInit {
 
         this.page = this._ecommerceProductsService.page;
         this.pages = this._ecommerceProductsService.pages;
+        this.total = this._ecommerceProductsService.total;
     }
 
     searchProductSKU(): void {

@@ -11,6 +11,8 @@ export class EcommerceProductsService implements Resolve<any> {
 
     page: any;
     pages: any;
+    total: any;
+
     products: any[];
     onProductsChanged: BehaviorSubject<any>;
 
@@ -43,11 +45,12 @@ export class EcommerceProductsService implements Resolve<any> {
             this._httpClient.get<any>(api, {headers})
             .subscribe(
                 (data) => {
-                    //console.log(data);
+                    console.log(data);
 
                     this.products = data.products;                    
                     this.page = page;
-                    this.pages = Math.ceil(data.total / 100);                    
+                    this.pages = Math.ceil(data.total / 100);    
+                    this.total = data.total;                
                     this.onProductsChanged.next(this.products);
 
                     resolve(data.products);
@@ -60,7 +63,7 @@ export class EcommerceProductsService implements Resolve<any> {
                 }
             ); 
         });
-    }
+    }   
 
     searchProduct(SKU) {
         return new Promise((resolve, reject) => {
@@ -75,7 +78,8 @@ export class EcommerceProductsService implements Resolve<any> {
                     
                     this.products = data.products;                    
                     this.page = 1;
-                    this.pages = Math.ceil(data.total / 100);                    
+                    this.pages = Math.ceil(data.total / 100);    
+                    this.total = data.total;                
                     this.onProductsChanged.next(this.products);
 
                     resolve(data.products);

@@ -60,26 +60,11 @@
                     <mat-cell *matCellDef="let product">
                         <p class="text-truncate">{{product.sku}}</p>
                     </mat-cell>
-                </ng-container>
-
-                <!-- Image Column -->
-                <ng-container matColumnDef="image">
-                    <mat-header-cell *matHeaderCellDef></mat-header-cell>
-                    <mat-cell *matCellDef="let product">
-                        <img class="product-image" *ngIf="product.images[0]" [alt]="product.name"
-                            [src]="product.images[0]" />
-                        <img *ngIf="!product.images[0]" [src]="'assets/images/ecommerce/product-image-placeholder.png'">
-                    </mat-cell>
-                </ng-container>
-
-                <!-- Name Column -->
-                <ng-container matColumnDef="name">
-                    <mat-header-cell *matHeaderCellDef>Descrição</mat-header-cell>
-                    <mat-cell *matCellDef="let product">
-                        <p class="text-truncate">{{product.name}}</p>
-                    </mat-cell>
                     <mat-footer-cell *matFooterCellDef>
                         <!-- PAGINATION -->
+                        <div class="total">
+                            total de registros: {{total}}
+                        </div>
                         <div class="paginacao">
                             <button class="mat-icon-button" (click)="firstPage()" [disabled]="page === 1">
                                 <span class="mat-button-wrapper">
@@ -117,8 +102,62 @@
 
                         </div>
                         <!-- / PAGINATION -->
-                    </mat-footer-cell>
+                    </mat-footer-cell>                    
                 </ng-container>
+
+                <!-- Image Column -->
+                <ng-container matColumnDef="image">
+                    <mat-header-cell *matHeaderCellDef>Imagem</mat-header-cell>
+                    <mat-cell *matCellDef="let product">
+                        <img class="product-image" *ngIf="product.images[0]" [alt]="product.name"
+                            [src]="product.images[0]" />
+                        <img *ngIf="!product.images[0]" [src]="'assets/images/ecommerce/product-image-placeholder.png'">
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <mat-header-cell *matHeaderCellDef>Descrição</mat-header-cell>
+                    <mat-cell *matCellDef="let product">
+                        <p class="text-truncate">{{product.name}}</p>
+                    </mat-cell>
+                </ng-container>
+
+                <!-- Price Column -->
+                <ng-container matColumnDef="price">
+                    <mat-header-cell *matHeaderCellDef>Preço</mat-header-cell>
+                    <mat-cell *matCellDef="let product">
+                        <p class="text-truncate">{{product.price}}</p>
+                    </mat-cell>
+                </ng-container>
+                
+                <!-- Stock Column -->
+                <ng-container matColumnDef="qty">
+                    <mat-header-cell *matHeaderCellDef>Estoque</mat-header-cell>
+                    <mat-cell *matCellDef="let product">
+                        <p class="text-truncate">{{product.qty}}</p>
+                    </mat-cell>
+                </ng-container>
+                
+                <!-- Marketplace -->
+                <ng-container matColumnDef="marketplace">
+                    <mat-header-cell *matHeaderCellDef fxHide fxShow.gt-sm>Marketplaces</mat-header-cell>
+                    <mat-cell *matCellDef="let product" fxHide fxShow.gt-sm>                        
+                        <mat-chip-list *ngIf="product.associations.length > 0">
+                            <mat-chip *ngFor="let association of product.associations" [ngClass]="{verde: association.status == 'linked', vermelho: association.status == 'declined', cinza: association.status == 'waiting_confirmation', amarelo: association.status == 'unlinked'}">
+                                {{association.platform}}
+                            </mat-chip>
+                        </mat-chip-list>
+                    </mat-cell>
+                </ng-container>                
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                    <mat-cell *matCellDef="let product">
+                        <p class="text-truncate">{{product.status}}</p>
+                    </mat-cell>
+                </ng-container>                
 
                 <mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></mat-header-row>
 
@@ -126,7 +165,7 @@
                     [routerLink]="'/apps/e-commerce/products/'+product.sku">
                 </mat-row>
 
-                <mat-footer-row *matFooterRowDef="['name']; sticky: true"></mat-footer-row>
+                <mat-footer-row *matFooterRowDef="['id']; sticky: true"></mat-footer-row>
 
             </mat-table>
 

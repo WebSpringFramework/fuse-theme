@@ -11,6 +11,8 @@ export class EcommerceOrdersService implements Resolve<any> {
 
     page: any;
     pages: any;
+    total:any;
+
     orders: any[];
     onOrdersChanged: BehaviorSubject<any>;
 
@@ -138,7 +140,8 @@ export class EcommerceOrdersService implements Resolve<any> {
                     
                     this.orders = data.orders;  
                     this.page = page;                  
-                    this.pages = Math.ceil(data.total / 100);                    
+                    this.pages = Math.ceil(data.total / 100); 
+                    this.total = data.total;                   
                     this.onOrdersChanged.next(this.orders);
 
                     resolve(data.orders);
@@ -166,7 +169,8 @@ export class EcommerceOrdersService implements Resolve<any> {
                     
                     this.orders = [data];                    
                     this.page = 1;   
-                    this.pages = 1;                   
+                    this.pages = 1;
+                    this.total = 1;                   
                     this.onOrdersChanged.next(this.orders);
 
                     resolve(data.orders);

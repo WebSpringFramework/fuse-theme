@@ -25,6 +25,7 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
     CODE = '';
     page: any;
     pages: any;
+    total: any;
     dataSource: FilesDataSource | null;
     displayedColumns = ['code', 'total', 'date', 'marketplace', 'status'];
     selectedStatus: any;
@@ -88,6 +89,7 @@ export class EcommerceOrdersComponent implements OnInit, OnDestroy
         
         this.page = this._ecommerceOrdersService.page;
         this.pages = this._ecommerceOrdersService.pages;
+        this.total = this._ecommerceOrdersService.total;
     }
 
     searchOrderCODE(): void {

@@ -62,6 +62,9 @@
                     </mat-cell>
                     <mat-footer-cell *matFooterCellDef>
                         <!-- PAGINATION -->
+                        <div class="total">
+                            total de registros: {{total}}
+                        </div>
                         <div class="paginacao">
                             <button class="mat-icon-button" (click)="firstPage()" [disabled]="page === 1">
                                 <span class="mat-button-wrapper">
